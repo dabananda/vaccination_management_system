@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django_filters',
     'cloudinary',
     'cloudinary_storage',
+    'api',
     'users',
     'campaigns',
     'bookings',
