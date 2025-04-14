@@ -1,6 +1,12 @@
-# 💉 Vaccination Management System API
+# 💉 [Vaccination Management System API](https://vaccination-management-system-three.vercel.app/)
 
 A secure, role-based RESTful API built with Django + DRF for managing vaccination campaigns, bookings, patient-doctor interactions, and campaign reviews. Features include email authentication, Cloudinary-powered profile picture uploads, JWT login, and Supabase PostgreSQL as the backend database.
+
+
+## 📃 API Documentation
+
+- [Swagger](https://vaccination-management-system-three.vercel.app/swagger/)
+- [Redoc](https://vaccination-management-system-three.vercel.app/redoc/)
 
 
 
