@@ -1,473 +1,265 @@
-# Django Project Setup Guide
+# 💉 Vaccination Management System API
 
-This guide provides step-by-step instructions for setting up and running a Django project with Tailwind CSS v4 and PostgreSQL on your machine.
+A secure, role-based RESTful API built with Django + DRF for managing vaccination campaigns, bookings, patient-doctor interactions, and campaign reviews. Features include email authentication, Cloudinary-powered profile picture uploads, JWT login, and Supabase PostgreSQL as the backend database.
 
-## Table of Contents
-- [Creating a New Django Project](#creating-a-new-django-project)
-- [Database Configuration](#database-configuration)
-- [Static Files Configuration](#static-files-configuration)
-- [File Uploads (Images)](#file-uploads-images)
-- [Installing Tailwind CSS v4](#installing-tailwind-css-v4)
-- [Database Migration Commands](#database-migration-commands)
-- [Cloning an Existing Project](#cloning-an-existing-project)
-- [Common Issues and Solutions](#common-issues-and-solutions)
-- [Additional Commands](#additional-commands)
-- [Generating Requirements File](#generating-requirements-file)
 
-## Creating a New Django Project
 
-1. Create a virtual environment:
-   ```bash
-   python -m venv <env_name>
-   ```
+## 🚀 Features
 
-2. Activate the virtual environment:
-   - Windows:
-     ```bash
-     <env_name>\Scripts\activate
-     ```
-   - macOS/Linux:
-     ```bash
-     source <env_name>/bin/activate
-     ```
+- 🧑‍⚕️ Role-based user system (Doctor / Patient)
+- 🔐 JWT authentication with email confirmation (via Djoser)
+- 📧 Password reset & activation via email
+- 💉 Doctors manage vaccine campaigns
+- 🗓 Patients can book one dose per campaign (auto-generates dose 2 date)
+- ✍️ Patients can leave reviews on campaigns they booked
+- 🖼 Profile picture uploads using Cloudinary
+- 🧾 Swagger documentation via drf-yasg
+- 🌐 Deployable to Vercel + Supabase PostgreSQL
+- 📦 Static file support with WhiteNoise
 
-3. Install Django and required packages:
-   ```bash
-   pip install Django
-   ```
 
-4. Create a new Django project:
-   ```bash
-   django-admin startproject <project_name> .
-   ```
-   Note: The dot (.) at the end creates the project in the current directory.
+## 🛠 Tech Stack
 
-5. Create a new Django app:
-	 ```bash
-   django-admin startapp <app_name>
-   ```
+| Layer       | Tech                     |
+|-------------|--------------------------|
+| Backend     | Django, Django REST Framework |
+| Auth        | Simple JWT, Djoser       |
+| Email       | SMTP (Gmail)             |
+| Media       | Cloudinary               |
+| DB          | Supabase PostgreSQL      |
+| Deployment  | Vercel                   |
+| Docs        | drf-yasg (Swagger/OpenAPI) |
+| Static      | WhiteNoise               |
 
-6. Add your app to the project settings:
-   Open `<project_name>/settings.py` and add your app to `INSTALLED_APPS`:
-   ```python
-   INSTALLED_APPS = [
-       'django.contrib.admin',
-       'django.contrib.auth',
-       # ... other default apps
-       '<app_name>',  # Add your app here
-   ]
-   ```
 
-## Database Configuration
-1. Open the terminal and run the command (make sure virtual environment is activated)
-	```bash
-	pip install psycopg2-binary
-   ```
-2. Configure PostgreSQL in your Django project:
-   Open `<project_name>/settings.py` and replace the default database settings with:
 
-   ```python
-   # Database: PostgreSQL
-   DATABASES = {
-       'default': {
-           'ENGINE': 'django.db.backends.postgresql',
-           'NAME': '<database_name>',
-           'USER': 'postgres',
-           'PASSWORD': '<database_password>',
-           'HOST': 'localhost',
-           'PORT': '5432'
-       }
-   }
-   ```
+## ⚙️ Setup Instructions (Local)
 
-3. For better security, consider using environment variables with python-decouple.
-	```bash
-   pip install python-decouple
-   ```
-   
-   Create a `.env` file in your project root:
-   ```
-   DB_NAME=<database_name>
-   DB_USER=postgres
-   DB_PASSWORD=<database_password>
-   DB_HOST=localhost
-   DB_PORT=5432
-   ```
-
-   Then update your settings.py:
-   ```python
-   from decouple import config
-
-   DATABASES = {
-       'default': {
-           'ENGINE': 'django.db.backends.postgresql',
-           'NAME': config('DB_NAME'),
-           'USER': config('DB_USER'),
-           'PASSWORD': config('DB_PASSWORD'),
-           'HOST': config('DB_HOST'),
-           'PORT': config('DB_PORT'),
-       }
-   }
-   ```
-
-## Static Files Configuration
-
-1. Configure static files in `settings.py`:
-   ```python
-   # Static files (CSS, JavaScript, Images)
-   STATIC_URL = '/static/'
-   STATICFILES_DIRS = [
-       BASE_DIR / "static",
-   ]
-   STATIC_ROOT = BASE_DIR / "staticfiles"
-   ```
-
-2. Create the static directory structure:
-   ```bash
-   mkdir -p static/{css,js,images}
-   ```
-
-3. Add static files to your templates:
-   ```html
-   {% load static %}
-   
-   <!-- CSS -->
-   <link rel="stylesheet" href="{% static 'css/output.css' %}">
-   
-   <!-- JavaScript -->
-   <script src="{% static 'js/main.js' %}"></script>
-   
-   <!-- Images -->
-   <img src="{% static 'images/logo.png' %}" alt="Logo">
-   ```
-
-4. Collect static files for production:
-   ```bash
-   python manage.py collectstatic
-   ```
-
-## File Uploads (Images)
-
-1. Configure media files in `settings.py`:
-   ```python
-   # Media files (User uploads)
-   MEDIA_URL = '/media/'
-   MEDIA_ROOT = BASE_DIR / 'media'
-   ```
-
-2. Update your project's `urls.py` to serve media files during development:
-   ```python
-   from django.conf import settings
-   from django.conf.urls.static import static
-   from django.contrib import admin
-   from django.urls import path, include
-
-   urlpatterns = [
-       path('admin/', admin.site.urls),
-       path('', include('app_name.urls')),
-       # ... other URL patterns
-   ]
-
-   urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-   ```
-
-3. Create a model with an image field:
-   ```python
-   from django.db import models
-
-   class Profile(models.Model):
-       name = models.CharField(max_length=100)
-       avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
-       
-       def __str__(self):
-           return self.name
-   ```
-
-4. Install Pillow for image processing:
-   ```bash
-   pip install Pillow
-   ```
-
-5. Create and apply migrations:
-   ```bash
-   python manage.py makemigrations
-   python manage.py migrate
-   ```
-
-6. Create a form with file upload capability:
-   ```python
-   # forms.py
-   from django import forms
-   from .models import Profile
-
-   class ProfileForm(forms.ModelForm):
-       class Meta:
-           model = Profile
-           fields = ['name', 'avatar']
-   ```
-
-7. Display and handle file uploads in a view:
-   ```python
-   # views.py
-   from django.shortcuts import render, redirect
-   from .forms import ProfileForm
-   from .models import Profile
-
-   def profile_create(request):
-       if request.method == 'POST':
-           form = ProfileForm(request.POST, request.FILES)
-           if form.is_valid():
-               form.save()
-               return redirect('profile_list')
-       else:
-           form = ProfileForm()
-       return render(request, 'app_name/profile_form.html', {'form': form})
-   ```
-
-8. Create a template with a file upload form:
-   ```html
-   {% extends "base.html" %}
-   
-   {% block content %}
-   <div class="container mx-auto">
-       <h1>Create Profile</h1>
-       <form method="post" enctype="multipart/form-data">
-           {% csrf_token %}
-           {{ form.as_p }}
-           <button type="submit">Save</button>
-       </form>
-   </div>
-   {% endblock %}
-   ```
-
-9. Display uploaded images:
-   ```html
-   <img src="{{ profile.avatar.url }}" alt="{{ profile.name }}">
-   ```
-
-## Installing Tailwind CSS v4
-
-1. Install Tailwind CSS and required packages:
-   ```bash
-   npm install tailwindcss @tailwindcss/postcss postcss
-   ```
-
-2. Create a PostCSS configuration file in the root directory:
-   ```bash
-   # Create file: postcss.config.mjs
-   ```
-
-3. Add the following code to `postcss.config.mjs`:
-   ```javascript
-   export default {
-     plugins: {
-       "@tailwindcss/postcss": {},
-     }
-   }
-   ```
-
-4. Create or update the CSS input file:
-   ```bash
-   # Create directory if it doesn't exist
-   mkdir -p static/css
-   # Create file: static/css/input.css
-   ```
-
-5. Add the following code to `static/css/input.css`:
-   ```css
-   @import "tailwindcss";
-   ```
-
-6. Add the following scripts to your `package.json` file (create it if it doesn't exist):
-   ```json
-   {
-     "scripts": {
-       "build:tailwind": "npx @tailwindcss/cli -i ./static/css/input.css -o ./static/css/output.css --minify",
-       "watch:tailwind": "npx @tailwindcss/cli -i ./static/css/input.css -o ./static/css/output.css --watch"
-     }
-   }
-   ```
-
-7. Include the compiled CSS in your HTML templates:
-   ```html
-   {% load static %}
-   <link rel="stylesheet" href="{% static 'css/output.css' %}">
-   ```
-   Note: Add `{% load static %}` at the top of your HTML file.
-
-8. Run Tailwind in watch mode during development:
-   ```bash
-   npm run watch:tailwind
-   ```
-
-## Database Migration Commands
-
-After making changes to your models, run these commands:
-
-1. Create migration files:
-   ```bash
-   python manage.py makemigrations
-   ```
-
-2. Apply migrations to the database:
-   ```bash
-   python manage.py migrate
-   ```
-
-## Cloning an Existing Project
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/username/repository-name.git
-   cd repository-name
-   ```
-
-2. Set up a virtual environment:
-   ```bash
-   # Create a virtual environment
-   python -m venv venv
-
-   # Activate the virtual environment (Windows)
-   venv\Scripts\activate
-   
-   # Activate the virtual environment (macOS/Linux)
-   source venv/bin/activate
-   ```
-
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. Configure environment variables (if needed):
-   ```bash
-   # Copy the example environment file
-   copy .env.example .env  # Windows
-   # cp .env.example .env  # macOS/Linux
-
-   # Edit the environment file with your settings
-   ```
-
-5. Set up the database:
-   ```bash
-   # Run migrations
-   python manage.py migrate
-
-   # Create a superuser for the admin panel
-   python manage.py createsuperuser
-   ```
-
-6. Run the development server:
-   ```bash
-   python manage.py runserver
-   ```
-
-   The site should now be available at http://127.0.0.1:8000/
-
-7. Accessing the admin panel:
-   
-   After creating a superuser, you can access the admin panel at:
-   http://127.0.0.1:8000/admin/
-
-## Common Issues and Solutions
-
-### Package Installation Problems
-
-If you encounter issues installing packages:
+1. **Clone the repo**
 
 ```bash
-# Try installing packages one by one
-pip install django
-pip install psycopg2-binary
-pip install python-decouple
-pip install [package_name]
+git clone https://github.com/your-username/vaccination-system.git
+cd vaccination-system
+
 ```
 
-### Database Connection Issues
-
-If using PostgreSQL or MySQL, ensure:
-- The database service is running
-- PostgreSQL is properly installed on your system
-- Your connection settings in settings.py or .env file are correct
-- The specified database exists (you may need to create it first)
+2.  **Create and activate virtual environment**
+    
 
 ```bash
-# Example for creating a PostgreSQL database
-# Connect to PostgreSQL
-psql -U postgres
+python -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate (Windows)
 
-# Create the database
-CREATE DATABASE django_todo_db;
-
-# Exit
-\q
 ```
 
-### Missing Static Files
-
-If static files aren't loading properly:
+3.  **Install dependencies**
+    
 
 ```bash
-# Collect static files
+pip install -r requirements.txt
+
+```
+
+4.  **Create `.env` or set environment variables**
+    
+
+```env
+DEBUG=True
+DJANGO_SECRET_KEY=your-secret
+DATABASE_URL=your-supabase-db-url
+EMAIL_HOST_USER=your-email@gmail.com
+EMAIL_HOST_PASSWORD=your-app-password
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+
+```
+
+5.  **Run migrations**
+    
+
+```bash
+python manage.py makemigrations
+python manage.py migrate
+
+```
+
+6.  **Create superuser (optional)**
+    
+
+```bash
+python manage.py createsuperuser
+
+```
+
+7.  **Collect static files**
+    
+
+```bash
 python manage.py collectstatic
+
 ```
 
-### File Upload Issues
+8.  **Run locally**
+    
 
-If you're having issues with file uploads:
+```bash
+python manage.py runserver
 
-1. Check MEDIA_ROOT and MEDIA_URL settings
-2. Ensure the form has `enctype="multipart/form-data"`
-3. Verify that Pillow is installed (`pip install Pillow`)
-4. Ensure the upload directory exists and is writable
-5. Check file size limits in your Django settings:
+```
+
+
+## 🚀 Deploy to Vercel (Backend API)
+
+1.  Push your code to GitHub.
+    
+2.  Go to [vercel.com](https://vercel.com/), import project from GitHub.
+    
+3.  Set environment variables (same as `.env`).
+    
+4.  Use a `vercel.json` and top-level `wsgi.py`:
+    
+
+### `vercel.json`
+
+```json
+{
+	"builds": [{
+		"src": "vaccination_system/wsgi.py",
+		"use": "@vercel/python",
+		"config": { "maxLambdaSize": "15mb", "runtime": "python3.11.3" }
+	}],
+	"routes": [{
+		"src": "/(.*)",
+		"dest": "vaccination_system/wsgi.py"
+	}]
+}
+```
+
+### `wsgi.py`
 
 ```python
-# Add to settings.py to increase upload limit
-DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+import os
+from django.core.wsgi import get_wsgi_application
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'vaccination_system.settings')
+app = get_wsgi_application()
+
 ```
 
-## Additional Commands
 
-```bash
-# Run tests
-python manage.py test
 
-# Create a new Django app
-python manage.py startapp [app_name]
+## 🔐 API Authentication
 
-# Generate requirements.txt file
-pip freeze > requirements.txt
+Endpoint
 
-# Install dependencies:
-pip install -r requirements.txt
+Description
+
+`/auth/jwt/create/`
+
+Login
+
+`/auth/users/`
+
+Register
+
+`/auth/users/activation/`
+
+Email activation
+
+`/auth/users/reset_password/`
+
+Forgot password
+
+`/auth/users/reset_password_confirm/`
+
+Reset confirmation
+
+`/auth/users/me/`
+
+Get current user
+
+
+
+## 🧪 API Functionalities
+
+Resource
+
+Endpoint
+
+Description
+
+Campaigns
+
+`/campaigns/`
+
+Public list & detail
+
+Bookings
+
+`/bookings/`
+
+Patient-only booking
+
+Reviews
+
+`/campaigns/<id>/reviews/`
+
+Nested reviews
+
+Profiles
+
+`/doctor/profile/`, `/patient/profile/`
+
+Role-specific profiles
+
+Swagger Docs
+
+`/swagger/`
+
+Full API docs
+
+
+
+## 🖼 Profile Picture Upload
+
+-   Cloudinary is used to store images
+    
+-   Doctors can upload via:
+    
+    -   `PATCH /api/v1/doctor/profile/` with `multipart/form-data`
+        
+-   Images appear at `profile_picture_url`
+    
+
+
+
+## ✅ Future Improvements
+
+-   Patient-side image upload
+    
+-   Admin photo previews
+    
+-   Role-based Swagger tags
+    
+
+
+
+## 📄 License
+
+This project is open source and free to use for educational and non-commercial purposes.
+
+----------
+
+## ✨ Author
+
+Developed by **[Dabananda Mitra](https://www.linkedin.com/in/dabananda/)**
+
 ```
-
-## Generating Requirements File
-
-To create a requirements.txt file that lists all the Python packages installed in your virtual environment:
-
-```bash
-# Make sure your virtual environment is activated, then run:
-pip freeze > requirements.txt
-```
-
-This file is essential when sharing your project with others or deploying it to a production server. It allows others to install the exact same package versions you used.
-
-Be sure to include the following essential packages in your requirements.txt:
-```
-Django==4.2.x  # Or your current version
-psycopg2-binary==2.9.x  # For PostgreSQL support
-python-decouple==3.8  # For environment variables
-Pillow==10.x.x  # For image processing
-```
-
-## Deactivating the Virtual Environment
-
-When you're done working on the project:
-
-```bash
-deactivate
+Let me know if you'd like me to:
+- Add a badge section (e.g., build passing, deploy preview)
+- Add screenshots of the Swagger docs
+- Tailor the README for academic submission (e.g., student ID, course name)
 ```
 
 ---
