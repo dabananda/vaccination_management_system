@@ -1,3 +1,4 @@
+from datetime import timedelta
 from django.db import models
 from users.models import User
 from campaigns.models import Campaign
@@ -16,7 +17,7 @@ class Booking(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.dose_2_date:
-            self.dose_2_date = self.dose_1_date + \
+            self.dose_2_date = self.dose_1_date + timedelta(days=28)
         super().save(*args, **kwargs)
 
     def __str__(self):
