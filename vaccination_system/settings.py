@@ -75,7 +75,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'vaccination_system.wsgi.application'
+WSGI_APPLICATION = 'vaccination_system.wsgi.app'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",

@@ -13,5 +13,4 @@ from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'vaccination_system.settings')
 
-application = get_wsgi_application()
-app = application  # For Vercel compatibility
+app = get_wsgi_application()  # For Vercel compatibility
