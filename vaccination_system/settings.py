@@ -166,6 +166,9 @@ DJOSER = {
     'LOGIN_FIELD': 'email',
     'USER_CREATE_PASSWORD_RETYPE': True,
     'SEND_ACTIVATION_EMAIL': True,
+    'EMAIL_FRONTEND_PROTOCOL': config('EMAIL_FRONTEND_PROTOCOL'),
+    'EMAIL_FRONTEND_DOMAIN': config('EMAIL_FRONTEND_DOMAIN'),
+    'EMAIL_FRONTEND_SITE_NAME': "Vaccination Management System",
     'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
     'ACTIVATION_URL': 'activate/{uid}/{token}',
     'SERIALIZERS': {
